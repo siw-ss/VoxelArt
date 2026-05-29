@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cherry Blossom Pagoda Garden — Voxel Scene</title>
+    <!-- Stylish fonts (graceful degradation if VPN blocks Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Noto+Serif+JP:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         color-scheme: dark;
@@ -28,36 +35,130 @@
         display: block;
       }
 
+      /* ===== Title overlay — cinematic, always readable ===== */
+
       #overlay {
         position: fixed;
-        top: 18px;
-        left: 18px;
+        top: 28px;
+        left: 28px;
         z-index: 10;
-        font-family:
-          "Segoe UI",
-          system-ui,
-          -apple-system,
-          sans-serif;
-        color: #fff;
-        max-width: 320px;
         pointer-events: none;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        max-width: 420px;
+      }
+      #overlay .title-card {
+        display: inline-block;
+        padding: 14px 22px 12px;
+        border-radius: 18px;
+        background: rgba(8, 10, 22, 0.55);
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
       }
       #overlay h1 {
-        font-size: 19px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-        margin-bottom: 4px;
-        background: linear-gradient(90deg, #ffd1e0, #ffb3c9, #f6c945);
+        font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        line-height: 1.15;
+        margin: 0 0 4px;
+        background: linear-gradient(
+          105deg,
+          #ffd1e0 0%,
+          #ffb3c9 35%,
+          #f6c945 70%,
+          #ffd1e0 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 6s ease-in-out infinite;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+        filter: drop-shadow(0 2px 6px rgba(255, 180, 200, 0.35));
       }
-      #overlay p {
-        font-size: 12.5px;
-        line-height: 1.5;
-        color: #d7dbe8;
-        opacity: 0.92;
+      @keyframes shimmer {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+      #overlay .subtitle-jp {
+        font-family: "Noto Serif JP", "Yu Mincho", "Hiragino Mincho Pro", serif;
+        font-size: 15px;
+        font-weight: 400;
+        color: rgba(255, 220, 230, 0.75);
+        letter-spacing: 2px;
+        margin: 0;
+      }
+
+      /* ===== Description — glass card with typewriter effect ===== */
+      #desc-card {
+        position: fixed;
+        top: 154px;
+        left: 28px;
+        z-index: 10;
+        max-width: 340px;
+        padding: 14px 18px 14px 20px;
+        border-radius: 14px;
+        background: rgba(12, 14, 28, 0.45);
+        backdrop-filter: blur(12px) saturate(130%);
+        -webkit-backdrop-filter: blur(12px) saturate(130%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-left: 3px solid rgba(255, 178, 204, 0.6);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(6px);
+        transition:
+          opacity 0.8s ease 0.6s,
+          transform 0.8s ease 0.6s;
+      }
+      #desc-card.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      #desc-card .desc-text {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        font-size: 13px;
+        line-height: 1.7;
+        color: rgba(215, 222, 240, 0.92);
+        letter-spacing: 0.2px;
+      }
+      #desc-card .cursor {
+        display: inline-block;
+        width: 2px;
+        height: 14px;
+        margin-left: 2px;
+        background: rgba(255, 178, 204, 0.85);
+        vertical-align: text-bottom;
+        animation: blink 0.9s steps(2) infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      #desc-card .desc-label {
+        display: block;
+        font-family: system-ui, sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: rgba(246, 201, 69, 0.7);
+        margin-bottom: 7px;
       }
 
       /* ===== macOS-style glass dock ===== */
@@ -121,7 +222,7 @@
           box-shadow 0.25s ease,
           border-color 0.25s ease;
       }
-      .dock-item input {
+      .dock-item > input {
         position: absolute;
         inset: 0;
         margin: 0;
@@ -203,6 +304,21 @@
       .sun-item:hover .tip {
         opacity: 0;
       }
+      /* subtle warm pulse on the sun icon to hint it's clickable */
+      .sun-item .ico {
+        animation: sun-pulse 3s ease-in-out infinite;
+      }
+      @keyframes sun-pulse {
+        0%,
+        100% {
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45))
+            drop-shadow(0 0 0px rgba(255, 200, 80, 0));
+        }
+        50% {
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45))
+            drop-shadow(0 0 8px rgba(255, 200, 80, 0.6));
+        }
+      }
 
       .dock-sep {
         width: 1px;
@@ -217,44 +333,38 @@
         );
       }
 
-      /* sun control — fly-out slider panel above the dock */
+      /* sun control — click-toggle panel above the dock */
       .sun-flyout {
         position: absolute;
         bottom: calc(100% + 16px);
         left: 50%;
-        transform: translateX(-50%) scale(calc(1 / var(--scale)));
+        transform: translateX(-50%) scale(calc(1 / var(--scale)))
+          translateY(6px);
         transform-origin: center bottom;
-        width: 210px;
-        padding: 13px 16px 14px;
-        border-radius: 16px;
+        width: 240px;
+        padding: 16px 18px 18px;
+        border-radius: 18px;
         background: linear-gradient(
           180deg,
-          rgba(40, 46, 74, 0.6),
-          rgba(16, 20, 38, 0.7)
+          rgba(40, 46, 74, 0.65),
+          rgba(16, 20, 38, 0.75)
         );
-        backdrop-filter: blur(18px) saturate(160%);
-        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
         border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+        box-shadow:
+          0 14px 40px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
         opacity: 0;
         pointer-events: none;
         transition:
-          opacity 0.18s ease,
-          transform 0.18s ease;
+          opacity 0.22s ease,
+          transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1.1);
       }
-      .sun-item:hover .sun-flyout,
-      .sun-flyout:hover {
+      .sun-flyout.open {
         opacity: 1;
         pointer-events: auto;
-      }
-      /* invisible bridge across the gap so hover survives the trip to the slider */
-      .sun-flyout::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        height: 20px;
+        transform: translateX(-50%) scale(calc(1 / var(--scale))) translateY(0);
       }
       .sun-flyout .sun-head {
         display: flex;
@@ -341,11 +451,16 @@
     <div id="app"></div>
 
     <div id="overlay">
-      <h1>Cherry Blossom Pagoda Garden</h1>
-      <p>
-        A floating voxel island with a five-roof pagoda, blossoming sakura, koi
-        pond, lanterns and drifting petals.
-      </p>
+      <div class="title-card">
+        <h1>Cherry Blossom<br />Pagoda Garden</h1>
+        <p class="subtitle-jp">桜の塔と庭園</p>
+      </div>
+    </div>
+
+    <div id="desc-card">
+      <span class="desc-label">About this scene</span>
+      <span class="desc-text" id="typewriter"></span
+      ><span class="cursor" id="tw-cursor"></span>
     </div>
 
     <div id="dock" role="toolbar" aria-label="Scene controls">
@@ -402,7 +517,12 @@
 
       <div class="dock-sep"></div>
 
-      <div class="dock-item sun-item" title="Sun position" tabindex="0">
+      <div
+        class="dock-item sun-item"
+        id="sun-btn"
+        title="Sun position"
+        tabindex="0"
+      >
         <span class="ico" aria-hidden="true">
           <svg
             viewBox="0 0 24 24"
@@ -419,11 +539,44 @@
           </svg>
         </span>
         <span class="tip">Sun &amp; time of day</span>
-        <div class="sun-flyout">
+        <div class="sun-flyout" id="sun-panel">
+          <!-- visual arc showing the sun's path -->
+          <svg
+            class="sun-arc"
+            viewBox="0 0 200 60"
+            fill="none"
+            style="width: 100%; height: 42px; margin-bottom: 8px"
+          >
+            <path
+              d="M10 55 Q100 -15 190 55"
+              stroke="rgba(255,255,255,0.12)"
+              stroke-width="2"
+              fill="none"
+              stroke-dasharray="4 4"
+            />
+            <circle id="sun-dot" cx="120" cy="18" r="7" fill="url(#sun-grad)" />
+            <defs>
+              <radialGradient id="sun-grad">
+                <stop offset="0%" stop-color="#fff" />
+                <stop offset="100%" stop-color="#ffd24a" />
+              </radialGradient>
+            </defs>
+          </svg>
           <div class="sun-head">
-            <span>Sun position</span><b id="sun-val">Midday</b>
+            <span>Time of day</span><b id="sun-val">Midday</b>
           </div>
           <input type="range" id="sun" min="0" max="100" value="62" />
+          <div
+            style="
+              text-align: center;
+              margin-top: 8px;
+              font-size: 10px;
+              color: rgba(255, 255, 255, 0.4);
+              letter-spacing: 0.5px;
+            "
+          >
+            Drag to move the sun across the sky
+          </div>
         </div>
       </div>
     </div>
@@ -472,6 +625,81 @@
           mouseX = null;
           schedule();
         });
+      })();
+    </script>
+
+    <!-- Sun panel click-toggle + arc dot position sync -->
+    <script>
+      (function () {
+        var btn = document.getElementById("sun-btn");
+        var panel = document.getElementById("sun-panel");
+        var slider = document.getElementById("sun");
+        var dot = document.getElementById("sun-dot");
+        if (!btn || !panel || !slider) return;
+
+        // Toggle panel on click
+        btn.addEventListener("click", function (e) {
+          // Don't toggle if they're interacting with the slider itself
+          if (e.target === slider) return;
+          panel.classList.toggle("open");
+        });
+
+        // Close panel when clicking outside
+        document.addEventListener("pointerdown", function (e) {
+          if (!panel.classList.contains("open")) return;
+          if (btn.contains(e.target) || panel.contains(e.target)) return;
+          panel.classList.remove("open");
+        });
+
+        // Close on Escape
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") panel.classList.remove("open");
+        });
+
+        // Move the arc dot to match the slider value
+        function syncDot() {
+          var v = slider.value / 100; // 0..1
+          // Quadratic bezier: P0=(10,55) P1=(100,-15) P2=(190,55)
+          var t = v;
+          var x = (1 - t) * (1 - t) * 10 + 2 * (1 - t) * t * 100 + t * t * 190;
+          var y = (1 - t) * (1 - t) * 55 + 2 * (1 - t) * t * -15 + t * t * 55;
+          if (dot) {
+            dot.setAttribute("cx", x.toFixed(1));
+            dot.setAttribute("cy", y.toFixed(1));
+          }
+        }
+        slider.addEventListener("input", syncDot);
+        syncDot(); // initial position
+      })();
+    </script>
+
+    <!-- Typewriter reveal for the description card -->
+    <script>
+      (function () {
+        var text =
+          "A floating voxel island suspended in a pastel sky — home to a five-tier pagoda with teal roofs and gold eaves, blossoming sakura, a koi pond with stone lanterns, and 900 drifting cherry petals.";
+        var el = document.getElementById("typewriter");
+        var card = document.getElementById("desc-card");
+        var cursor = document.getElementById("tw-cursor");
+        if (!el || !card) return;
+        var i = 0;
+        // wait for the scene to appear, then start typing
+        var startDelay = setTimeout(function () {
+          card.classList.add("visible");
+          type();
+        }, 1800);
+        function type() {
+          if (i < text.length) {
+            el.textContent += text[i];
+            i++;
+            setTimeout(type, 28 + Math.random() * 32);
+          } else {
+            // done typing — fade cursor after a beat
+            setTimeout(function () {
+              if (cursor) cursor.style.opacity = "0";
+            }, 2200);
+          }
+        }
       })();
     </script>
 
