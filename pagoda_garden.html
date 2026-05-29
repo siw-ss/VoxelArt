@@ -300,9 +300,9 @@
       .dock-item:hover .tip {
         opacity: 1;
       }
-      /* sun item shows its fly-out instead of the small tip */
-      .sun-item:hover .tip {
-        opacity: 0;
+      /* hide sun tooltip when its panel is open */
+      .sun-item.panel-open .tip {
+        opacity: 0 !important;
       }
       /* subtle warm pulse on the sun icon to hint it's clickable */
       .sun-item .ico {
@@ -335,28 +335,30 @@
 
       /* sun control — click-toggle panel above the dock */
       .sun-flyout {
-        position: absolute;
-        bottom: calc(100% + 16px);
-        left: 50%;
-        transform: translateX(-50%) scale(calc(1 / var(--scale)))
-          translateY(6px);
+        position: fixed;
+        bottom: 136px;
+        left: 55%;
+        transform: translateX(-50%) translateY(6px);
         transform-origin: center bottom;
         width: 240px;
         padding: 16px 18px 18px;
         border-radius: 18px;
         background: linear-gradient(
           180deg,
-          rgba(40, 46, 74, 0.65),
-          rgba(16, 20, 38, 0.75)
+          rgba(40, 46, 74, 0.42),
+          rgba(16, 20, 38, 0.5)
         );
-        backdrop-filter: blur(20px) saturate(160%);
-        -webkit-backdrop-filter: blur(20px) saturate(160%);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(22px) saturate(160%);
+        -webkit-backdrop-filter: blur(22px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow:
-          0 14px 40px rgba(0, 0, 0, 0.5),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+          0 12px 40px rgba(0, 0, 0, 0.45),
+          0 2px 8px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.35),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.06);
         opacity: 0;
         pointer-events: none;
+        z-index: 25;
         transition:
           opacity 0.22s ease,
           transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1.1);
@@ -364,7 +366,7 @@
       .sun-flyout.open {
         opacity: 1;
         pointer-events: auto;
-        transform: translateX(-50%) scale(calc(1 / var(--scale))) translateY(0);
+        transform: translateX(-50%) translateY(0);
       }
       .sun-flyout .sun-head {
         display: flex;
@@ -539,45 +541,46 @@
           </svg>
         </span>
         <span class="tip">Sun &amp; time of day</span>
-        <div class="sun-flyout" id="sun-panel">
-          <!-- visual arc showing the sun's path -->
-          <svg
-            class="sun-arc"
-            viewBox="0 0 200 60"
-            fill="none"
-            style="width: 100%; height: 42px; margin-bottom: 8px"
-          >
-            <path
-              d="M10 55 Q100 -15 190 55"
-              stroke="rgba(255,255,255,0.12)"
-              stroke-width="2"
-              fill="none"
-              stroke-dasharray="4 4"
-            />
-            <circle id="sun-dot" cx="120" cy="18" r="7" fill="url(#sun-grad)" />
-            <defs>
-              <radialGradient id="sun-grad">
-                <stop offset="0%" stop-color="#fff" />
-                <stop offset="100%" stop-color="#ffd24a" />
-              </radialGradient>
-            </defs>
-          </svg>
-          <div class="sun-head">
-            <span>Time of day</span><b id="sun-val">Midday</b>
-          </div>
-          <input type="range" id="sun" min="0" max="100" value="62" />
-          <div
-            style="
-              text-align: center;
-              margin-top: 8px;
-              font-size: 10px;
-              color: rgba(255, 255, 255, 0.4);
-              letter-spacing: 0.5px;
-            "
-          >
-            Drag to move the sun across the sky
-          </div>
-        </div>
+      </div>
+    </div>
+
+    <!-- Sun panel — lives OUTSIDE the dock so magnification can't affect it -->
+    <div class="sun-flyout" id="sun-panel">
+      <svg
+        class="sun-arc"
+        viewBox="0 0 200 60"
+        fill="none"
+        style="width: 100%; height: 42px; margin-bottom: 8px"
+      >
+        <path
+          d="M10 55 Q100 -15 190 55"
+          stroke="rgba(255,255,255,0.12)"
+          stroke-width="2"
+          fill="none"
+          stroke-dasharray="4 4"
+        />
+        <circle id="sun-dot" cx="120" cy="18" r="7" fill="url(#sun-grad)" />
+        <defs>
+          <radialGradient id="sun-grad">
+            <stop offset="0%" stop-color="#fff" />
+            <stop offset="100%" stop-color="#ffd24a" />
+          </radialGradient>
+        </defs>
+      </svg>
+      <div class="sun-head">
+        <span>Time of day</span><b id="sun-val">Midday</b>
+      </div>
+      <input type="range" id="sun" min="0" max="100" value="62" />
+      <div
+        style="
+          text-align: center;
+          margin-top: 8px;
+          font-size: 10px;
+          color: rgba(255, 255, 255, 0.4);
+          letter-spacing: 0.5px;
+        "
+      >
+        Drag to move the sun across the sky
       </div>
     </div>
 
@@ -637,23 +640,39 @@
         var dot = document.getElementById("sun-dot");
         if (!btn || !panel || !slider) return;
 
-        // Toggle panel on click
+        function openPanel() {
+          panel.classList.add("open");
+          btn.classList.add("panel-open");
+        }
+        function closePanel() {
+          panel.classList.remove("open");
+          btn.classList.remove("panel-open");
+        }
+
+        // Toggle panel on click of the sun icon
         btn.addEventListener("click", function (e) {
-          // Don't toggle if they're interacting with the slider itself
-          if (e.target === slider) return;
-          panel.classList.toggle("open");
+          if (panel.classList.contains("open")) {
+            closePanel();
+          } else {
+            openPanel();
+          }
         });
 
-        // Close panel when clicking outside
+        // Prevent slider interaction from closing the panel
+        panel.addEventListener("pointerdown", function (e) {
+          e.stopPropagation();
+        });
+
+        // Close panel when clicking outside both the button and the panel
         document.addEventListener("pointerdown", function (e) {
           if (!panel.classList.contains("open")) return;
           if (btn.contains(e.target) || panel.contains(e.target)) return;
-          panel.classList.remove("open");
+          closePanel();
         });
 
         // Close on Escape
         document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") panel.classList.remove("open");
+          if (e.key === "Escape") closePanel();
         });
 
         // Move the arc dot to match the slider value
