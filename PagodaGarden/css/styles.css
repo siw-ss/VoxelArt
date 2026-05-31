@@ -1,0 +1,435 @@
+:root {
+  color-scheme: dark;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b1020;
+}
+#app {
+  position: fixed;
+  inset: 0;
+}
+canvas {
+  display: block;
+}
+
+/* ===== Title overlay — cinematic, always readable ===== */
+
+#overlay {
+  position: fixed;
+  top: 28px;
+  left: 28px;
+  z-index: 10;
+  pointer-events: none;
+  max-width: 420px;
+}
+#overlay .title-card {
+  display: inline-block;
+  padding: 14px 22px 12px;
+  border-radius: 18px;
+  background: rgba(8, 10, 22, 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+#overlay h1 {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+  margin: 0 0 4px;
+  background: linear-gradient(
+    105deg,
+    #ffd1e0 0%,
+    #ffb3c9 35%,
+    #f6c945 70%,
+    #ffd1e0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 6s ease-in-out infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(255, 180, 200, 0.35));
+}
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+#overlay .subtitle-jp {
+  font-family: "Noto Serif JP", "Yu Mincho", "Hiragino Mincho Pro", serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(255, 220, 230, 0.75);
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+/* ===== Description — glass card with typewriter effect ===== */
+#desc-card {
+  position: fixed;
+  top: 154px;
+  left: 28px;
+  z-index: 10;
+  max-width: 340px;
+  padding: 14px 18px 14px 20px;
+  border-radius: 14px;
+  background: rgba(12, 14, 28, 0.45);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid rgba(255, 178, 204, 0.6);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.8s ease 0.6s,
+    transform 0.8s ease 0.6s;
+}
+#desc-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+#desc-card .desc-text {
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(215, 222, 240, 0.92);
+  letter-spacing: 0.2px;
+}
+#desc-card .cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  margin-left: 2px;
+  background: rgba(255, 178, 204, 0.85);
+  vertical-align: text-bottom;
+  animation: blink 0.9s steps(2) infinite;
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+#desc-card .desc-label {
+  display: block;
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(246, 201, 69, 0.7);
+  margin-bottom: 7px;
+}
+
+/* ===== macOS-style glass dock ===== */
+#dock {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 11px 18px 13px;
+  border-radius: 26px;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 46, 74, 0.42),
+    rgba(16, 20, 38, 0.5)
+  );
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+
+.dock-item {
+  --scale: 1;
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.05)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: scale(var(--scale));
+  transform-origin: bottom center;
+  transition:
+    transform 0.16s cubic-bezier(0.2, 0.7, 0.2, 1.2),
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.dock-item > input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.dock-item .ico {
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+.dock-item .ico svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* toggle ON state — warm sakura/gold glass glow + running dot */
+.dock-item.toggle:has(input:checked) {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 158, 189, 0.65),
+    rgba(246, 201, 69, 0.45)
+  );
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 6px 20px rgba(255, 130, 170, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.dock-item.toggle:not(:has(input:checked)) .ico {
+  opacity: 0.4;
+  transform: scale(0.92);
+}
+.dock-item.toggle::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+  transform: translateX(-50%);
+  transition: background 0.25s ease;
+}
+.dock-item.toggle:has(input:checked)::after {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* tooltip label (counter-scaled so it stays readable when magnified) */
+.dock-item .tip {
+  position: absolute;
+  bottom: calc(100% + 13px);
+  left: 50%;
+  transform: translateX(-50%) scale(calc(1 / var(--scale)));
+  transform-origin: center bottom;
+  padding: 4px 10px;
+  border-radius: 9px;
+  background: rgba(18, 22, 38, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.dock-item:hover .tip {
+  opacity: 1;
+}
+/* hide sun tooltip when its panel is open */
+.sun-item.panel-open .tip {
+  opacity: 0 !important;
+}
+/* subtle warm pulse on the sun icon to hint it's clickable */
+.sun-item .ico {
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+@keyframes sun-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 0 0px rgba(255, 200, 80, 0));
+  }
+  50% {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 0 8px rgba(255, 200, 80, 0.6));
+  }
+}
+
+.dock-sep {
+  width: 1px;
+  height: 34px;
+  margin: 0 2px 6px;
+  align-self: center;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.28),
+    rgba(255, 255, 255, 0)
+  );
+}
+
+/* sun control — click-toggle panel above the dock */
+.sun-flyout {
+  position: fixed;
+  bottom: 136px;
+  left: 55%;
+  transform: translateX(-50%) translateY(6px);
+  transform-origin: center bottom;
+  width: 240px;
+  padding: 16px 18px 18px;
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 46, 74, 0.42),
+    rgba(16, 20, 38, 0.5)
+  );
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 25;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1.1);
+}
+.sun-flyout.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.sun-flyout .sun-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 9px;
+  font-size: 11.5px;
+  color: #eef;
+  letter-spacing: 0.3px;
+}
+.sun-flyout .sun-head b {
+  font-weight: 600;
+  color: #ffd98a;
+}
+#sun {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 7px;
+  border-radius: 7px;
+  outline: none;
+  background: linear-gradient(90deg, #6a86c8, #f6c945 55%, #ff9ebb);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+#sun::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #ffe6b0);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 2px 7px rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(255, 210, 120, 0.7);
+  cursor: pointer;
+}
+#sun::-moz-range-thumb {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #ffe6b0);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+#hint {
+  position: fixed;
+  bottom: 102px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  color: #aeb6cc;
+  background: rgba(10, 12, 24, 0.4);
+  backdrop-filter: blur(6px);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b1020;
+  color: #ffd1e0;
+  font-family: system-ui, sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  transition: opacity 0.6s ease;
+}
+#loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
