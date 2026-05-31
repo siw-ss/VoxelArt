@@ -47,22 +47,43 @@ document.getElementById('app').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 
+// Starfield — hidden by default, shown in night mode
+const starGeometry = new THREE.BufferGeometry();
+const starCount = 500;
+const starPositions = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+    starPositions[i * 3]     = (Math.random() - 0.5) * 400;
+    starPositions[i * 3 + 1] = 50 + Math.random() * 150;
+    starPositions[i * 3 + 2] = (Math.random() - 0.5) * 400;
+}
+starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1.5, transparent: true, opacity: 0 });
+const starField = new THREE.Points(starGeometry, starMaterial);
+scene.add(starField);
+
 // Gradient sky background
-function makeSky() {
+function makeSky(night = false) {
     const c = document.createElement('canvas');
     c.width = 2; c.height = 256;
     const ctx = c.getContext('2d');
     const g = ctx.createLinearGradient(0, 0, 0, 256);
-    g.addColorStop(0.00, '#8ec9f2'); // top — clear blue
-    g.addColorStop(0.38, '#a9dbef'); // mid sky
-    g.addColorStop(0.72, '#f3d9e6'); // pink haze
-    g.addColorStop(1.00, '#ffe9d6'); // warm horizon
+    if (night) {
+        g.addColorStop(0.00, '#0a0f1e');
+        g.addColorStop(0.38, '#1a2545');
+        g.addColorStop(0.72, '#2d3b6e');
+        g.addColorStop(1.00, '#3d4b85');
+    } else {
+        g.addColorStop(0.00, '#8ec9f2');
+        g.addColorStop(0.38, '#a9dbef');
+        g.addColorStop(0.72, '#f3d9e6');
+        g.addColorStop(1.00, '#ffe9d6');
+    }
     ctx.fillStyle = g; ctx.fillRect(0, 0, 2, 256);
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
 }
-scene.background = makeSky();
+scene.background = makeSky(false);
 scene.fog = new THREE.Fog(0xdfe7f2, 120, 260);
 
 const camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 600);
@@ -201,6 +222,42 @@ if (elPetalsBtn && elPetalsPanel && elPetalsCount) {
     if (elPetalsVal) elPetalsVal.textContent = elPetalsCount.value;
 }
 
+// Night mode
+const elNightMode = document.getElementById('night-mode');
+const elSunBtn = document.getElementById('sun-btn');
+let isNightMode = false;
+
+if (elNightMode) {
+    elNightMode.addEventListener('change', (e) => {
+        isNightMode = e.target.checked;
+
+        // Sky + stars
+        scene.background = makeSky(isNightMode);
+        starField.material.opacity = isNightMode ? 1 : 0;
+        scene.fog = new THREE.Fog(isNightMode ? 0x1a2545 : 0xdfe7f2, 120, 260);
+
+        // Lighting
+        if (isNightMode) {
+            sun.color.set(0x3355aa);
+            sun.intensity = 0.15;
+            hemi.intensity = 0.2;
+            ambient.intensity = 0.08;
+        } else {
+            // Restore day defaults — re-fire the sun slider to recalculate
+            hemi.intensity = 0.85;
+            ambient.intensity = 0.18;
+            elSun.dispatchEvent(new Event('input'));
+        }
+
+        // Disable/enable sun panel button
+        if (elSunBtn) {
+            elSunBtn.style.opacity = isNightMode ? '0.35' : '';
+            elSunBtn.style.pointerEvents = isNightMode ? 'none' : '';
+            elSunBtn.title = isNightMode ? 'Disabled in night mode' : 'Sun position';
+        }
+    });
+}
+
 addEventListener('resize', () => {
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
@@ -220,10 +277,13 @@ function animate() {
 
     updatePetals(dt, t);
 
-    // gentle lantern flicker
+    // gentle lantern flicker — brighter at night
     flick += dt;
     const f = 0.85 + Math.sin(flick * 7) * 0.06 + Math.sin(flick * 13.7) * 0.04;
-    for (const l of lanternLights) l.intensity = (l.userData.base ?? (l.userData.base = l.intensity)) * f;
+    const lanternMultiplier = isNightMode ? 2.5 : 1.0;
+    for (const l of lanternLights) {
+        l.intensity = (l.userData.base ?? (l.userData.base = l.intensity)) * f * lanternMultiplier;
+    }
 
     // drift clouds slowly
     cloudGroup.position.x = (Math.sin(t * 0.02) * 6);
