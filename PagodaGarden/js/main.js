@@ -116,7 +116,7 @@ scene.add(root);
 const { lanternLights, R } = buildScene({ scene, world, root });
 
 // Petals + clouds
-const { updatePetals, setPetalsOn, cloudGroup } = createPetals({ scene, R });
+const { updatePetals, setPetalsOn, setPetalCount, cloudGroup } = createPetals({ scene, R });
 
 // ---------------------------------------------------------------------------
 //  UI WIRING — connect dock controls to scene objects
@@ -151,6 +151,54 @@ if (elHomeLabel) {
         console.log('Home view clicked, navigating to:', '../index.html');
         goToHome();
     });
+}
+
+// Petals panel
+const elPetalsBtn = document.getElementById('petals-btn');
+const elPetalsPanel = document.getElementById('petals-panel');
+const elPetalsCount = document.getElementById('petals-count');
+const elPetalsVal = document.getElementById('petals-val');
+
+if (elPetalsBtn && elPetalsPanel && elPetalsCount) {
+    function openPetalsPanel() {
+        elPetalsPanel.classList.add('open');
+        if (elPetalsBtn) elPetalsBtn.classList.add('panel-open');
+    }
+    function closePetalsPanel() {
+        elPetalsPanel.classList.remove('open');
+        if (elPetalsBtn) elPetalsBtn.classList.remove('panel-open');
+    }
+    
+    elPetalsBtn.addEventListener('click', function(e) {
+        if (elPetalsPanel.classList.contains('open')) {
+            closePetalsPanel();
+        } else {
+            openPetalsPanel();
+        }
+    });
+    
+    elPetalsPanel.addEventListener('pointerdown', function(e) {
+        e.stopPropagation();
+    });
+    
+    document.addEventListener('pointerdown', function(e) {
+        if (!elPetalsPanel.classList.contains('open')) return;
+        if (elPetalsBtn.contains(e.target) || elPetalsPanel.contains(e.target)) return;
+        closePetalsPanel();
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePetalsPanel();
+    });
+    
+    elPetalsCount.addEventListener('input', function(e) {
+        const count = parseInt(e.target.value, 10);
+        setPetalCount(count);
+        if (elPetalsVal) elPetalsVal.textContent = count;
+    });
+    
+    // Sync initial value
+    if (elPetalsVal) elPetalsVal.textContent = elPetalsCount.value;
 }
 
 addEventListener('resize', () => {

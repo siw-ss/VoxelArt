@@ -42,24 +42,37 @@ export function createPetals({ scene, R }) {
   petalMesh.instanceColor.needsUpdate = true;
 
   let petalsOn = true;
+  let visiblePetalCount = PETAL_COUNT;
+
   function updatePetals(dt, t) {
     for (let i = 0; i < PETAL_COUNT; i++) {
       const p = petals[i];
-      if (petalsOn) {
+      const visible = i < visiblePetalCount;
+      if (petalsOn && visible) {
         p.y -= p.vy * dt;
         p.rot += p.rotSpd * dt;
         p.spinPhase = (p.spinPhase || 0) + p.spin * dt;
         if (p.y < FLOOR_Y) resetPetal(p, false);
       }
-      const sx = p.x + Math.sin(t * p.swayFreq + p.phase) * p.sway;
-      const sz = p.z + Math.cos(t * p.swayFreq * 0.8 + p.phase) * p.sway;
-      _pp.set(sx, p.y, sz);
-      _pe.set(p.spinPhase || 0, p.rot, p.rot * 0.6);
-      _pq.setFromEuler(_pe);
-      _pm.compose(_pp, _pq, _ps);
+      if (visible) {
+        const sx = p.x + Math.sin(t * p.swayFreq + p.phase) * p.sway;
+        const sz = p.z + Math.cos(t * p.swayFreq * 0.8 + p.phase) * p.sway;
+        _pp.set(sx, p.y, sz);
+        _pe.set(p.spinPhase || 0, p.rot, p.rot * 0.6);
+        _pq.setFromEuler(_pe);
+        _pm.compose(_pp, _pq, _ps);
+      } else {
+        // scale to zero to hide
+        _pm.makeScale(0, 0, 0);
+      }
       petalMesh.setMatrixAt(i, _pm);
     }
     petalMesh.instanceMatrix.needsUpdate = true;
+  }
+
+  function setPetalsOn(on) { petalsOn = on; petalMesh.visible = on; }
+  function setPetalCount(count) {
+    visiblePetalCount = Math.max(10, Math.min(PETAL_COUNT, Math.floor(count)));
   }
 
   // drifting soft clouds (flat billboard-ish voxel slabs up high)
@@ -80,7 +93,5 @@ export function createPetals({ scene, R }) {
   for (let i = 0; i < 6; i++) makeCloud(-80 + i * 30 + (Math.random() * 10 | 0), 60 + (Math.random() * 14 | 0), -60 + (Math.random() * 120 | 0));
   cloudWorld.commit(cloudGroup);
 
-
-  function setPetalsOn(on) { petalsOn = on; petalMesh.visible = on; }
-  return { petalMesh, updatePetals, setPetalsOn, cloudGroup };
+  return { petalMesh, updatePetals, setPetalsOn, setPetalCount, cloudGroup };
 }

@@ -110,6 +110,22 @@
         <span class="tip">Sun &amp; time of day</span>
       </div>
 
+      <div
+        class="dock-item petals-item"
+        id="petals-btn"
+        title="Petal count"
+        tabindex="0"
+      >
+        <span class="ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v1M12 20v1M4.22 4.22l.7.7M19.07 19.07l.71.71M3 12H2M22 12h-1M4.93 19.07l-.71.71M19.78 4.93l-.7-.71" opacity="0.5"/>
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 8c0-1.5.8-3 2-4M12 8c0-1.5-.8-3-2-4M16 12c1.5 0 3 .8 4 2M16 12c1.5 0 3-.8 4-2M12 16c0 1.5.8 3 2 4M12 16c0 1.5-.8 3-2 4M8 12c-1.5 0-3 .8-4 2M8 12c-1.5 0-3-.8-4-2" opacity="0.7"/>
+          </svg>
+        </span>
+        <span class="tip">Petal count</span>
+      </div>
+
       <label class="dock-item toggle" title="Home view">
         <input type="checkbox" id="home-view" />
         <span class="ico" aria-hidden="true">
@@ -166,6 +182,25 @@
         "
       >
         Drag to move the sun across the sky
+      </div>
+    </div>
+
+    <!-- Petals panel — lives OUTSIDE the dock so magnification can't affect it -->
+    <div class="petals-flyout" id="petals-panel">
+      <div class="sun-head">
+        <span>Petal count</span><b id="petals-val">900</b>
+      </div>
+      <input type="range" id="petals-count" min="10" max="900" value="900" step="10" />
+      <div
+        style="
+          text-align: center;
+          margin-top: 8px;
+          font-size: 10px;
+          color: rgba(255, 255, 255, 0.4);
+          letter-spacing: 0.5px;
+        "
+      >
+        Adjust the number of falling petals
       </div>
     </div>
 
