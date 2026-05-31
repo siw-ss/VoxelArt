@@ -28,10 +28,9 @@ Then open: `http://localhost:8000`
 
 ```
 VoxelArt/
-├── index.html              # Main entry point
+├── index.html              # Main entry point (portfolio gallery)
 ├── css/
 │   └── styles.css          # All styling and responsive design
-├── js/                     # JavaScript files (if needed)
 └── PagodaGarden/           # Voxel scene project
     ├── index.html
     ├── css/
