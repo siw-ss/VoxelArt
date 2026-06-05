@@ -137,8 +137,8 @@ const { bridgeLights, islands } = buildScene({ scene, world, root });
 // Effects (waterfalls, particles, clouds)
 const { updateEffects, setWaterfallsOn, cloudGroup } = createEffects({ scene, islands });
 
-// Animals (bunnies on bridges, gazelle on west island)
-const { updateAnimals } = createAnimals({ scene, islands });
+// Animals (chickens and chicks on bridges)
+const { updateAnimals, setChickCount } = createAnimals({ scene, islands });
 
 // ---------------------------------------------------------------------------
 //  GRAVITY TOGGLE — shift islands to new random altitudes
@@ -191,6 +191,55 @@ elSun.addEventListener('input', e => {
 const elHomeLabel = document.querySelector('label[title="Home view"]');
 if (elHomeLabel) {
     elHomeLabel.addEventListener('click', () => goToHome());
+}
+
+// Chick count panel
+const elChickBtn = document.getElementById('chick-btn');
+const elChickPanel = document.getElementById('chick-panel');
+const elChickCount = document.getElementById('chick-count');
+const elChickVal = document.getElementById('chick-val');
+
+if (elChickBtn && elChickPanel && elChickCount) {
+    function openChickPanel() {
+        elChickPanel.classList.add('open');
+        elChickBtn.classList.add('panel-open');
+    }
+    function closeChickPanel() {
+        elChickPanel.classList.remove('open');
+        elChickBtn.classList.remove('panel-open');
+    }
+
+    elChickBtn.addEventListener('pointerdown', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (elChickPanel.classList.contains('open')) {
+            closeChickPanel();
+        } else {
+            openChickPanel();
+        }
+    });
+
+    elChickPanel.addEventListener('pointerdown', function (e) {
+        e.stopPropagation();
+    });
+
+    document.addEventListener('pointerdown', function (e) {
+        if (!elChickPanel.classList.contains('open')) return;
+        if (elChickBtn.contains(e.target) || elChickPanel.contains(e.target)) return;
+        closeChickPanel();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeChickPanel();
+    });
+
+    elChickCount.addEventListener('input', function (e) {
+        const count = parseInt(e.target.value, 10);
+        setChickCount(count);
+        if (elChickVal) elChickVal.textContent = count;
+    });
+
+    if (elChickVal) elChickVal.textContent = elChickCount.value;
 }
 
 // Night mode

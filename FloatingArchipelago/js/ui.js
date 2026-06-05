@@ -95,7 +95,7 @@ export function initSunPanel() {
 }
 
 export function initTypewriter() {
-    var text = "Multiple voxel islands float at different altitudes in an endless sky, connected by luminescent crystal bridges with cascading waterfalls, ancient temple ruins, and a watchtower overlooking the archipelago.";
+    var text = "Multiple voxel islands float at different altitudes in an endless sky, connected by luminescent crystal bridges with cascading waterfalls, ancient temple ruins, and flocks of chickens and bright yellow chicks roaming freely between islands.";
     var el = document.getElementById("typewriter");
     var card = document.getElementById("desc-card");
     var cursor = document.getElementById("tw-cursor");

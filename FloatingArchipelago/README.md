@@ -39,7 +39,7 @@ FloatingArchipelago/
 │   ├── scene-builder.js    # Island generation, structures, bridges, vegetation
 │   ├── voxel-world.js      # InstancedMesh-based voxel rendering engine
 │   ├── effects.js          # Waterfalls, mist, ambient particles, clouds
-│   ├── animals.js          # Animated bunnies on temple stairs
+│   ├── animals.js          # Animated chickens hopping between islands
 │   ├── ui.js               # Dock magnification, sun panel, typewriter, diagnostics
 │   └── palette.js          # Voxel color palette definitions
 ├── vendor/
@@ -68,7 +68,7 @@ FloatingArchipelago/
 - **Procedural Island Generation:** Organic coastlines with multi-octave noise, geological layering (light stone → dark stone → mineral rock), stalactite underhangs, surface boulders
 - **Crystal Bridges:** Four arced bridge connections with 3-voxel-wide decks, railing posts, rune markings, and pulsing teal glow
 - **Waterfalls:** 250 animated water particles flowing between islands with lateral wind drift, fade-over-lifetime, and mist accumulation at base (80 mist particles)
-- **Animated Wildlife:** 3 small bunnies hopping up and down the temple entrance staircase with parabolic arcs, squash-and-stretch, ear physics, and idle head-tilting
+- **Animated Wildlife:** 4 unique brownish chickens and 3 tiny yellow chicks hopping between islands via crystal bridges, each with its own feather color palette, wing-flapping, head-pecking, and idle behaviors
 - **Ambient Particles:** 50 floating pollen/dust motes with orbital drift patterns
 - **Voxel Clouds:** Five cloud formations drifting below the islands
 - **Starfield:** 400 stars revealed in night mode with deep indigo sky

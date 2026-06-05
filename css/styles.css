@@ -71,7 +71,7 @@ h1 {
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   border-radius: 24px;
@@ -79,15 +79,16 @@ h1 {
   text-decoration: none;
   color: #fff;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   overflow: hidden;
 }
 
 .card:hover {
   transform: translateY(-8px);
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .card-content {
@@ -133,17 +134,13 @@ h1 {
 }
 
 .card-secondary .card-tag {
-  background: rgba(47, 109, 143, 0.3);
-  color: #fff;
+  background: rgba(0, 229, 255, 0.2);
+  color: #00E5FF;
 }
 
 .card-placeholder .card-tag {
   background: rgba(246, 201, 69, 0.3);
-  color: #fff;
-}
-
-.card:hover .card-tag:hover {
-  background: rgba(255, 255, 255, 0.5);
+  color: var(--gold);
 }
 
 .coming-soon {
@@ -166,6 +163,7 @@ h1 {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
