@@ -260,7 +260,7 @@ function computeBridgeWaypoints(islands, bridgeIdx) {
 // ============================================================================
 //  MAIN EXPORT
 // ============================================================================
-export function createAnimals({ scene, islands }) {
+export function createAnimals({ scene, root, islands }) {
     const CHICKEN_COUNT = 4;
     const chickens = [];
 
@@ -328,7 +328,7 @@ export function createAnimals({ scene, islands }) {
     // Spawn chickens on random islands
     for (let c = 0; c < CHICKEN_COUNT; c++) {
         const model = buildChicken(c);
-        scene.add(model);
+        root.add(model);
         const islIdx = Math.floor(Math.random() * islands.length);
         const state = createBirdState(islIdx);
         chickens.push({ model, ...state });
@@ -378,7 +378,7 @@ export function createAnimals({ scene, islands }) {
 
     function spawnChick() {
         const model = buildChick();
-        scene.add(model);
+        root.add(model);
         const islIdx = Math.floor(Math.random() * islands.length);
         const state = createBirdState(islIdx);
         return { model, ...state };

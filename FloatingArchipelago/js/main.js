@@ -135,19 +135,27 @@ scene.add(root);
 const { bridgeLights, islands } = buildScene({ scene, world, root });
 
 // Effects (waterfalls, particles, clouds)
-const { updateEffects, setWaterfallsOn, cloudGroup } = createEffects({ scene, islands });
+const { updateEffects, setWaterfallsOn, cloudGroup } = createEffects({ scene, root, islands });
 
 // Animals (chickens and chicks on bridges)
-const { updateAnimals, setChickCount } = createAnimals({ scene, islands });
+const { updateAnimals, setChickCount } = createAnimals({ scene, root, islands });
 
 // ---------------------------------------------------------------------------
-//  GRAVITY TOGGLE — shift islands to new random altitudes
+//  GRAVITY TOGGLE — rotate islands independently around their centers
 // ---------------------------------------------------------------------------
 let gravityShifted = false;
-const islandGroups = []; // We'll animate root children conceptually
 const originalPositions = islands.map(isl => ({ y: isl.y }));
-let gravityTargets = islands.map(() => 0);
 let gravityProgress = 1;
+const GRAVITY_ANIMATION_SPEED = 0.5; // seconds to reach full rotation speed
+
+// Rotation state for each island
+const islandRotations = islands.map((isl, idx) => ({
+    quaternion: new THREE.Quaternion(),
+    angularVelocity: new THREE.Vector3(),
+    center: new THREE.Vector3(isl.cx, isl.y, isl.cz),
+    speedMultiplier: idx === 0 ? 2.0 : 0.8 + Math.random() * 0.6, // central faster
+    direction: idx % 2 === 0 ? 1 : -1, // alternating directions
+}));
 
 // ---------------------------------------------------------------------------
 //  UI WIRING
@@ -165,12 +173,25 @@ elWaterfalls.addEventListener('change', e => setWaterfallsOn(e.target.checked));
 
 elGravity.addEventListener('change', e => {
     gravityShifted = e.target.checked;
-    if (gravityShifted) {
-        gravityTargets = islands.map(() => (Math.random() - 0.5) * 20);
-    } else {
-        gravityTargets = islands.map(() => 0);
-    }
     gravityProgress = 0;
+    if (gravityShifted) {
+        // Start rotations with random angular velocities
+        for (let i = 0; i < islandRotations.length; i++) {
+            const rot = islandRotations[i];
+            const speed = 3 + Math.random() * 2; // rad/sec
+            const randomAxis = new THREE.Vector3(
+                Math.random() - 0.5,
+                Math.random() - 0.5,
+                Math.random() - 0.5
+            ).normalize();
+            rot.angularVelocity = randomAxis.multiplyScalar(speed * rot.direction * rot.speedMultiplier);
+        }
+    } else {
+        // Stop rotations
+        for (const rot of islandRotations) {
+            rot.angularVelocity.set(0, 0, 0);
+        }
+    }
 });
 
 elSun.addEventListener('input', e => {
@@ -290,6 +311,41 @@ function animate() {
 
     // Animate animals
     updateAnimals(dt, t);
+
+    // Animate island rotations
+    if (gravityShifted && gravityProgress < 1) {
+        gravityProgress = Math.min(1, gravityProgress + dt / GRAVITY_ANIMATION_SPEED);
+    }
+    
+    if (gravityShifted) {
+        // Update island rotations
+        for (let i = 0; i < islandRotations.length; i++) {
+            const rot = islandRotations[i];
+            
+            // Ease in the angular velocity
+            const speedScale = Math.min(1, gravityProgress / (GRAVITY_ANIMATION_SPEED * 0.5));
+            const scaledVelocity = rot.angularVelocity.clone().multiplyScalar(speedScale);
+            
+            // Update rotation using angular velocity
+            const deltaQuat = new THREE.Quaternion();
+            const angle = scaledVelocity.length() * dt;
+            if (angle > 0.001) {
+                deltaQuat.setFromAxisAngle(scaledVelocity.normalize(), angle);
+                rot.quaternion.multiplyQuaternions(deltaQuat, rot.quaternion);
+            }
+        }
+        
+        // Apply cumulative rotation to root
+        // This creates a unified spin effect where all islands rotate together
+        const mainAxis = new THREE.Vector3(0.2, 1, 0.15).normalize();
+        const mainAngle = t * 0.6; // continuous rotation speed
+        const mainQuat = new THREE.Quaternion();
+        mainQuat.setFromAxisAngle(mainAxis, mainAngle);
+        root.quaternion.copy(mainQuat);
+    } else {
+        // Return to identity
+        root.quaternion.identity();
+    }
 
     // Crystal bridge glow pulse
     const pulse = 0.4 + Math.sin(t * 2.1) * 0.15;

@@ -5,7 +5,7 @@ import { VoxelWorld } from './voxel-world.js';
 // ---------------------------------------------------------------------------
 //  EFFECTS — Waterfalls, ambient particles, cloud systems
 // ---------------------------------------------------------------------------
-export function createEffects({ scene, islands }) {
+export function createEffects({ scene, root, islands }) {
 
     // ---- WATERFALL PARTICLES ----
     const WATERFALL_COUNT = 250;
@@ -17,7 +17,7 @@ export function createEffects({ scene, islands }) {
     const waterfallMesh = new THREE.InstancedMesh(waterfallGeo, waterfallMat, WATERFALL_COUNT);
     waterfallMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     waterfallMesh.frustumCulled = false;
-    scene.add(waterfallMesh);
+    root.add(waterfallMesh);
 
     // Waterfall sources (from higher islands to lower)
     const waterfallSources = [
@@ -59,7 +59,7 @@ export function createEffects({ scene, islands }) {
     const mistMesh = new THREE.InstancedMesh(mistGeo, mistMat, MIST_COUNT);
     mistMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     mistMesh.frustumCulled = false;
-    scene.add(mistMesh);
+    root.add(mistMesh);
 
     const mistParticles = [];
     for (let i = 0; i < MIST_COUNT; i++) {
@@ -87,7 +87,7 @@ export function createEffects({ scene, islands }) {
     const pollenMesh = new THREE.InstancedMesh(pollenGeo, pollenMat, POLLEN_COUNT);
     pollenMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     pollenMesh.frustumCulled = false;
-    scene.add(pollenMesh);
+    root.add(pollenMesh);
 
     const pollenParticles = [];
     for (let i = 0; i < POLLEN_COUNT; i++) {
@@ -102,7 +102,7 @@ export function createEffects({ scene, islands }) {
 
     // ---- CLOUDS ----
     const cloudGroup = new THREE.Group();
-    scene.add(cloudGroup);
+    root.add(cloudGroup);
     const cloudWorld = new VoxelWorld();
     function makeCloud(cx, cy, cz) {
         const w = 8 + (Math.random() * 8 | 0), d = 5 + (Math.random() * 5 | 0);

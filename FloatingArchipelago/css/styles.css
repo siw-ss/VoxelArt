@@ -86,7 +86,7 @@ canvas {
 /* ===== Description card ===== */
 #desc-card {
     position: fixed;
-    top: 140px;
+    top: 154px;
     left: 28px;
     z-index: 10;
     max-width: 340px;
