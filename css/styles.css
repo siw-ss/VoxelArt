@@ -138,6 +138,11 @@ h1 {
   color: #00E5FF;
 }
 
+.card-tertiary .card-tag {
+  background: rgba(150, 220, 255, 0.25);
+  color: #96dcff;
+}
+
 .card-placeholder .card-tag {
   background: rgba(246, 201, 69, 0.3);
   color: var(--gold);
