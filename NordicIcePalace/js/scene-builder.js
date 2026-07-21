@@ -122,15 +122,23 @@ const PALACE = {
 };
 
 // ---------------------------------------------------------------------------
-//  buildPalace — great hall, spires, flying buttresses, ice bridges, stairways
-//  Platform at Y=2 (raised 3 above lake at Y=-1).
-//  Overlap resolution: first-placed element wins via placed Set.
+//  buildPalace — elaborate ice palace with:
+//  - Raised platform with decorative border
+//  - Great hall with arched windows and pillar columns
+//  - Crenellated roof parapet
+//  - Central dome above the hall
+//  - Four tapered spires with tiered rings
+//  - Flying buttresses
+//  - Arced ice bridges with full railings
+//  - Grand entrance stairways with flanking pillars
 // ---------------------------------------------------------------------------
 export function buildPalace(world) {
     const placed = new Set();
     const wallOpts = { rough: 0.2, emissive: '#88ccff', emissiveI: 0.15 };
+    const glowOpts = { rough: 0.1, emissive: '#aaeeff', emissiveI: 0.35 };
+    const crystalOpts = { rough: 0.05, emissive: '#66eeff', emissiveI: 0.5 };
+    const darkIceOpts = { rough: 0.3, emissive: '#446688', emissiveI: 0.1 };
 
-    // Helper: place a voxel only if position not already occupied
     function placeVoxel(x, y, z, color, opts) {
         const key = `${x},${y},${z}`;
         if (placed.has(key)) return;
@@ -138,67 +146,161 @@ export function buildPalace(world) {
         world.add(x, y, z, color, opts);
     }
 
-    // --- Platform ---
-    // Solid platform from Y=-1 to Y=1 (3 layers), centered at origin
-    const platHalfW = Math.floor(PALACE.hallWidth / 2) + 2; // slightly larger than hall
-    const platHalfD = Math.floor(PALACE.hallDepth / 2) + 2;
+    // --- Platform with decorative border ---
+    const platHalfW = Math.floor(PALACE.hallWidth / 2) + 3;
+    const platHalfD = Math.floor(PALACE.hallDepth / 2) + 3;
     for (let y = -1; y <= 1; y++) {
         for (let x = -platHalfW; x <= platHalfW; x++) {
             for (let z = -platHalfD; z <= platHalfD; z++) {
-                placeVoxel(x, y, z, pick(PAL.platform), { rough: 0.5 });
+                const isEdge = Math.abs(x) === platHalfW || Math.abs(z) === platHalfD;
+                const color = isEdge ? pick(PAL.ice) : pick(PAL.platform);
+                const opts = isEdge ? glowOpts : { rough: 0.5 };
+                placeVoxel(x, y, z, color, opts);
             }
         }
     }
 
+    // Platform border posts (every 4 voxels along edge)
+    for (let x = -platHalfW; x <= platHalfW; x += 4) {
+        placeVoxel(x, 2, -platHalfD, pick(PAL.ice), glowOpts);
+        placeVoxel(x, 3, -platHalfD, pick(PAL.spireGlow), crystalOpts);
+        placeVoxel(x, 2, platHalfD, pick(PAL.ice), glowOpts);
+        placeVoxel(x, 3, platHalfD, pick(PAL.spireGlow), crystalOpts);
+    }
+    for (let z = -platHalfD; z <= platHalfD; z += 4) {
+        placeVoxel(-platHalfW, 2, z, pick(PAL.ice), glowOpts);
+        placeVoxel(-platHalfW, 3, z, pick(PAL.spireGlow), crystalOpts);
+        placeVoxel(platHalfW, 2, z, pick(PAL.ice), glowOpts);
+        placeVoxel(platHalfW, 3, z, pick(PAL.spireGlow), crystalOpts);
+    }
+
     // --- Great Hall ---
-    // Hall base starts at Y=2 (top of platform), walls rise wallHeight (12)
-    const hallX0 = -Math.floor(PALACE.hallWidth / 2);  // -7
-    const hallZ0 = -Math.floor(PALACE.hallDepth / 2);  // -7
+    const hallX0 = -Math.floor(PALACE.hallWidth / 2);
+    const hallZ0 = -Math.floor(PALACE.hallDepth / 2);
     const hallY0 = 2;
     const hallW = PALACE.hallWidth;
     const hallD = PALACE.hallDepth;
     const wallH = PALACE.wallHeight;
 
-    // Floor of great hall
+    // Floor with checkered pattern
     for (let x = 0; x < hallW; x++) {
         for (let z = 0; z < hallD; z++) {
-            placeVoxel(hallX0 + x, hallY0, hallZ0 + z, pick(PAL.ice), wallOpts);
+            const checker = (x + z) % 2 === 0;
+            const color = checker ? pick(PAL.ice) : pick(['#d0f0ff', '#c8e8f8']);
+            placeVoxel(hallX0 + x, hallY0, hallZ0 + z, color, { rough: 0.15 });
         }
     }
 
-    // Walls of great hall (hollow)
+    // Walls with arched windows
     for (let y = 1; y <= wallH; y++) {
         for (let x = 0; x < hallW; x++) {
             for (let z = 0; z < hallD; z++) {
-                const edge = (x === 0 || x === hallW - 1 || z === 0 || z === hallD - 1);
-                if (edge) {
-                    placeVoxel(hallX0 + x, hallY0 + y, hallZ0 + z, pick(PAL.ice), wallOpts);
+                const onNorth = z === 0;
+                const onSouth = z === hallD - 1;
+                const onWest = x === 0;
+                const onEast = x === hallW - 1;
+                if (!(onNorth || onSouth || onWest || onEast)) continue;
+
+                // Arched window cutouts on walls (not corners)
+                let isWindow = false;
+                if (onNorth || onSouth) {
+                    const wx = x % 4;
+                    if (x > 1 && x < hallW - 2 && wx >= 1 && wx <= 2 && y >= 4 && y <= 9) {
+                        isWindow = true;
+                        // Arch top
+                        if (y === 9 && wx === 1) isWindow = true;
+                        if (y === 9 && wx === 2) isWindow = true;
+                        if (y === 10 && (wx === 1 || wx === 2)) isWindow = false;
+                    }
+                }
+                if (onWest || onEast) {
+                    const wz = z % 4;
+                    if (z > 1 && z < hallD - 2 && wz >= 1 && wz <= 2 && y >= 4 && y <= 9) {
+                        isWindow = true;
+                    }
+                }
+
+                if (!isWindow) {
+                    // Corner pillars get a different color
+                    const isCorner = (onNorth || onSouth) && (onWest || onEast);
+                    const color = isCorner ? pick(['#e8ffff', '#ffffff']) : pick(PAL.ice);
+                    const opts = isCorner ? glowOpts : wallOpts;
+                    placeVoxel(hallX0 + x, hallY0 + y, hallZ0 + z, color, opts);
                 }
             }
         }
     }
 
-    // Roof of great hall (flat slab)
-    const roofY = hallY0 + wallH + 1; // Y = 2 + 12 + 1 = 15
+    // --- Interior Pillars (4 columns inside the hall) ---
+    const pillarPositions = [
+        { x: hallX0 + 3, z: hallZ0 + 3 },
+        { x: hallX0 + hallW - 4, z: hallZ0 + 3 },
+        { x: hallX0 + 3, z: hallZ0 + hallD - 4 },
+        { x: hallX0 + hallW - 4, z: hallZ0 + hallD - 4 },
+    ];
+
+    pillarPositions.forEach(({ x, z }) => {
+        for (let y = 1; y <= wallH; y++) {
+            placeVoxel(x, hallY0 + y, z, pick(['#e0ffff', '#ffffff']), glowOpts);
+        }
+        // Pillar capital (wider at top)
+        placeVoxel(x - 1, hallY0 + wallH, z, pick(PAL.ice), wallOpts);
+        placeVoxel(x + 1, hallY0 + wallH, z, pick(PAL.ice), wallOpts);
+        placeVoxel(x, hallY0 + wallH, z - 1, pick(PAL.ice), wallOpts);
+        placeVoxel(x, hallY0 + wallH, z + 1, pick(PAL.ice), wallOpts);
+    });
+
+    // --- Roof slab ---
+    const roofY = hallY0 + wallH + 1;
     for (let x = 0; x < hallW; x++) {
         for (let z = 0; z < hallD; z++) {
             placeVoxel(hallX0 + x, roofY, hallZ0 + z, pick(PAL.ice), wallOpts);
         }
     }
 
-    // --- Spires at corners ---
-    // Corners of the hall (inner corners)
+    // --- Crenellated Parapet ---
+    for (let x = 0; x < hallW; x++) {
+        for (let z = 0; z < hallD; z++) {
+            const onEdge = x === 0 || x === hallW - 1 || z === 0 || z === hallD - 1;
+            if (!onEdge) continue;
+            // Merlon pattern: 2 up, 1 gap
+            const pos = x === 0 || x === hallW - 1 ? z : x;
+            if (pos % 3 !== 2) {
+                placeVoxel(hallX0 + x, roofY + 1, hallZ0 + z, pick(PAL.ice), wallOpts);
+            }
+        }
+    }
+
+    // --- Central Dome (hemisphere above the roof center) ---
+    const domeRadius = 4;
+    const domeCenterY = roofY + 1;
+    for (let dx = -domeRadius; dx <= domeRadius; dx++) {
+        for (let dz = -domeRadius; dz <= domeRadius; dz++) {
+            for (let dy = 0; dy <= domeRadius; dy++) {
+                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (dist <= domeRadius && dist >= domeRadius - 1.2) {
+                    placeVoxel(dx, domeCenterY + dy, dz, pick(PAL.ice), glowOpts);
+                }
+            }
+        }
+    }
+    // Dome finial crystal
+    for (let y = 0; y < 3; y++) {
+        placeVoxel(0, domeCenterY + domeRadius + y, 0, pick(PAL.spireGlow), crystalOpts);
+    }
+
+    // --- Spires at corners (tapered with tiered rings) ---
     const spirePositions = [
-        { x: hallX0, z: hallZ0 },                          // NW corner
-        { x: hallX0 + hallW - 1, z: hallZ0 },              // NE corner
-        { x: hallX0, z: hallZ0 + hallD - 1 },              // SW corner
-        { x: hallX0 + hallW - 1, z: hallZ0 + hallD - 1 },  // SE corner
+        { x: hallX0, z: hallZ0 },
+        { x: hallX0 + hallW - 1, z: hallZ0 },
+        { x: hallX0, z: hallZ0 + hallD - 1 },
+        { x: hallX0 + hallW - 1, z: hallZ0 + hallD - 1 },
     ];
 
-    const spireBaseY = roofY + 1; // starts above roof
+    const spireBaseY = roofY + 1;
 
     spirePositions.forEach((sp) => {
-        // Spire column: 2×2 cross-section rising spireHeight above roof
+        // Main spire column (2x2)
         for (let y = 0; y < PALACE.spireHeight; y++) {
             for (let dx = -1; dx <= 0; dx++) {
                 for (let dz = -1; dz <= 0; dz++) {
@@ -207,16 +309,31 @@ export function buildPalace(world) {
             }
         }
 
-        // Spire tip — narrowed to 1×1 for last 3 voxels with glow
-        const tipOpts = { rough: 0.1, emissive: '#88ccff', emissiveI: 0.4 };
+        // Tiered rings at 1/3 and 2/3 height
+        const ringHeights = [Math.floor(PALACE.spireHeight / 3), Math.floor(2 * PALACE.spireHeight / 3)];
+        ringHeights.forEach(h => {
+            for (let dx = -2; dx <= 1; dx++) {
+                for (let dz = -2; dz <= 1; dz++) {
+                    const isOuter = Math.abs(dx) === 2 || Math.abs(dz) === 2 || dx === 1 || dz === 1;
+                    if (isOuter) {
+                        placeVoxel(sp.x + dx, spireBaseY + h, sp.z + dz, pick(PAL.ice), glowOpts);
+                    }
+                }
+            }
+        });
+
+        // Tapered top (1x1 narrowing)
+        for (let y = 0; y < 5; y++) {
+            placeVoxel(sp.x, spireBaseY + PALACE.spireHeight + y, sp.z, pick(PAL.ice), glowOpts);
+        }
+
+        // Spire crystal tip
         for (let y = 0; y < 3; y++) {
-            placeVoxel(sp.x, spireBaseY + PALACE.spireHeight + y, sp.z, pick(PAL.spireGlow), tipOpts);
+            placeVoxel(sp.x, spireBaseY + PALACE.spireHeight + 5 + y, sp.z, pick(PAL.spireGlow), crystalOpts);
         }
     });
 
-    // --- Flying Buttresses ---
-    // Each buttress connects a spire base to the hall wall midpoint
-    // Diagonal line from spire corner down to mid-wall height
+    // --- Flying Buttresses (arced, not just straight lines) ---
     const buttressTargets = [
         { spire: spirePositions[0], wallMid: { x: hallX0 + Math.floor(hallW / 2), z: hallZ0 } },
         { spire: spirePositions[1], wallMid: { x: hallX0 + Math.floor(hallW / 2), z: hallZ0 } },
@@ -225,28 +342,30 @@ export function buildPalace(world) {
     ];
 
     buttressTargets.forEach(({ spire, wallMid }) => {
-        const startY = roofY - 2;  // buttress starts just below roofline
-        const endY = hallY0 + Math.floor(wallH / 2); // connects to mid-wall
+        const startY = roofY - 1;
+        const endY = hallY0 + Math.floor(wallH / 2);
         const steps = startY - endY;
 
         for (let i = 0; i <= steps; i++) {
             const t = steps > 0 ? i / steps : 0;
             const bx = Math.round(spire.x + (wallMid.x - spire.x) * t);
             const bz = Math.round(spire.z + (wallMid.z - spire.z) * t);
-            const by = startY - i;
+            // Parabolic arc: slight upward bow
+            const arc = Math.sin(t * Math.PI) * 2;
+            const by = Math.round(startY - i + arc);
             placeVoxel(bx, by, bz, pick(PAL.ice), wallOpts);
+            // Thicken the buttress
+            placeVoxel(bx, by - 1, bz, pick(PAL.ice), darkIceOpts);
         }
     });
 
-    // --- Ice Bridges ---
-    // Bridge 1: NW spire to NE spire (across the north wall)
-    // Bridge 2: SW spire to SE spire (across the south wall)
+    // --- Ice Bridges with full railings and arc ---
     const bridgePairs = [
         [spirePositions[0], spirePositions[1]],
         [spirePositions[2], spirePositions[3]],
     ];
 
-    const bridgeY = roofY + 3; // above hall walls
+    const bridgeY = roofY + 3;
     const bridgeOpts = { rough: 0.15, emissive: '#88ccff', emissiveI: 0.2 };
 
     bridgePairs.forEach(([from, to]) => {
@@ -258,42 +377,59 @@ export function buildPalace(world) {
             const t = dist > 0 ? i / dist : 0;
             const bx = Math.round(from.x + dx * t);
             const bz = Math.round(from.z + dz * t);
+            // Slight arc
+            const arc = Math.round(Math.sin(t * Math.PI) * 1.5);
 
-            // Bridge deck (2 voxels wide)
-            placeVoxel(bx, bridgeY, bz, pick(PAL.ice), bridgeOpts);
-            placeVoxel(bx, bridgeY, bz + (dz === 0 ? 1 : 0), pick(PAL.ice), bridgeOpts);
+            // Bridge deck (3 voxels wide for grander look)
+            const offsetDir = dz === 0 ? 'z' : 'x';
+            for (let w = -1; w <= 1; w++) {
+                const wx = offsetDir === 'z' ? bx : bx + w;
+                const wz = offsetDir === 'z' ? bz + w : bz;
+                placeVoxel(wx, bridgeY + arc, wz, pick(PAL.ice), bridgeOpts);
+            }
 
-            // Railings on edges (every other voxel)
-            if (i % 2 === 0 && i > 0 && i < dist) {
-                const railZ = dz === 0 ? bz - 1 : bz;
-                const railX = dx === 0 ? bx - 1 : bx;
-                placeVoxel(railX, bridgeY + 1, railZ, pick(PAL.ice), bridgeOpts);
+            // Railings on both sides
+            const r1 = offsetDir === 'z' ? bz - 2 : bx - 2;
+            const r2 = offsetDir === 'z' ? bz + 2 : bx + 2;
+            if (offsetDir === 'z') {
+                placeVoxel(bx, bridgeY + arc + 1, bz - 2, pick(PAL.ice), bridgeOpts);
+                placeVoxel(bx, bridgeY + arc + 1, bz + 2, pick(PAL.ice), bridgeOpts);
+            } else {
+                placeVoxel(bx - 2, bridgeY + arc + 1, bz, pick(PAL.ice), bridgeOpts);
+                placeVoxel(bx + 2, bridgeY + arc + 1, bz, pick(PAL.ice), bridgeOpts);
             }
         }
     });
 
-    // --- Entrance Stairways ---
-    // Stairway 1: facing north (negative Z direction)
-    // Stairway 2: facing south (positive Z direction)
-    // Steps lead from lake level (Y=-1) outside the platform, up to platform top (Y=1)
+    // --- Grand Entrance Stairways with flanking pillars ---
     const stairDirections = [
-        { baseZ: -(platHalfD + 1), dz: -1, x: 0 },   // north stair starts beyond platform
-        { baseZ: platHalfD + 1, dz: 1, x: 0 },       // south stair starts beyond platform
+        { baseZ: -(platHalfD + 1), dz: -1, x: 0 },
+        { baseZ: platHalfD + 1, dz: 1, x: 0 },
     ];
 
     stairDirections.forEach(({ baseZ, dz, x: stairCenterX }) => {
-        // 3 steps: bottom at lake level (Y=-1), top at platform level (Y=1)
-        const stairWidth = 3;
+        // 5-wide staircase (grander entrance)
+        const stairWidth = 5;
         const halfW = Math.floor(stairWidth / 2);
 
-        for (let step = 0; step < PALACE.platformHeight; step++) {
-            const sy = -1 + step;                          // Y = -1, 0, 1
-            const sz = baseZ + dz * (PALACE.platformHeight - 1 - step); // lowest step is furthest out
+        for (let step = 0; step < PALACE.platformHeight + 1; step++) {
+            const sy = -1 + step;
+            const sz = baseZ + dz * (PALACE.platformHeight - step);
 
             for (let sx = stairCenterX - halfW; sx <= stairCenterX + halfW; sx++) {
                 placeVoxel(sx, sy, sz, pick(PAL.platform), { rough: 0.4 });
             }
         }
+
+        // Flanking pillars at stair entrance
+        const pillarZ = baseZ + dz * PALACE.platformHeight;
+        for (let py = -1; py <= 5; py++) {
+            placeVoxel(stairCenterX - halfW - 1, py, pillarZ, pick(PAL.ice), glowOpts);
+            placeVoxel(stairCenterX + halfW + 1, py, pillarZ, pick(PAL.ice), glowOpts);
+        }
+        // Crystal tops on entrance pillars
+        placeVoxel(stairCenterX - halfW - 1, 6, pillarZ, pick(PAL.spireGlow), crystalOpts);
+        placeVoxel(stairCenterX + halfW + 1, 6, pillarZ, pick(PAL.spireGlow), crystalOpts);
     });
 }
 
@@ -631,10 +767,8 @@ export function buildScene({ scene, world, root }) {
     const spireLights = [];
 
     // Spire top positions (corner coordinates from PALACE geometry)
-    // Hall: hallX0=-7, hallZ0=-7, hallW=14, hallD=14
-    // Spire corners: NW(-7,-7), NE(6,-7), SW(-7,6), SE(6,6)
-    // Spire top Y = spireBaseY(16) + spireHeight(14) + 3 tip voxels = 33
-    const spireTopY = 33;
+    // Spire top Y = spireBaseY(16) + spireHeight(14) + 5 taper + 3 crystal = 38
+    const spireTopY = 38;
     const spireCorners = [
         { x: -7, z: -7 },  // NW
         { x: 6, z: -7 },   // NE

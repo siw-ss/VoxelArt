@@ -6,10 +6,10 @@ import { PAL } from './palette.js';
 
 const AURORA = {
     bandCount: 3,
-    bandSpacing: 3,       // voxel units vertical offset between bands
-    baseY: 55,
-    width: 80,
-    depth: 40,
+    bandSpacing: 4,       // voxel units vertical offset between bands
+    baseY: 48,
+    width: 100,
+    depth: 50,
     segmentsW: 64,
     segmentsH: 16,
     defaultSpeed: 1.0,
@@ -38,8 +38,8 @@ const fragmentShader = /* glsl */ `
     uniform float uIntensity;
     varying vec2 vUv;
     void main() {
-        float alpha = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.7, vUv.y);
-        alpha *= uIntensity * (0.2 + 0.3 * sin(vUv.x * 3.14159));
+        float alpha = smoothstep(0.0, 0.2, vUv.y) * smoothstep(1.0, 0.8, vUv.y);
+        alpha *= uIntensity * (0.35 + 0.4 * sin(vUv.x * 3.14159));
         vec3 color = mix(uColorPrimary, uColorSecondary, vUv.y);
         gl_FragColor = vec4(color, alpha);
     }
@@ -88,10 +88,10 @@ export function createAurora({ scene, root }) {
 
         // Position each band with vertical spacing
         const bandY = AURORA.baseY + i * AURORA.bandSpacing;
-        mesh.position.set(0, bandY, 0);
+        mesh.position.set(0, bandY, -10);
 
-        // Rotate to lay flat (face upward/camera) with slight tilt
-        mesh.rotation.x = -Math.PI / 2;
+        // Tilt toward the camera (~60° from vertical) so bands are visible from default orbit
+        mesh.rotation.x = -Math.PI / 3;
 
         mesh.name = `aurora-band-${i}`;
         mesh.frustumCulled = false;
