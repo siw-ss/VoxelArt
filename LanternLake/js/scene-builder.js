@@ -15,8 +15,8 @@ export function buildTerrain(world) {
     const taperRate = 0.7;
     const strataDepth = 5;
 
-    // Flower colors for shoreline
-    const flowers = ['#ff6b8a', '#ff9ecb', '#ffcc44', '#aa66ff', '#66ccff', '#ff8844', '#ffffff'];
+    // Flower colors for shoreline — red, yellow, bright pink
+    const flowers = ['#e81224', '#cc0000', '#ffcc00', '#ffd700', '#ff1493', '#ff69b4'];
 
     for (let x = -radius; x <= radius; x++) {
         for (let z = -radius; z <= radius; z++) {
@@ -32,9 +32,9 @@ export function buildTerrain(world) {
                 // Lush shoreline — grass with scattered flowers
                 world.add(x, 0, z, pick(PAL.grass), { rough: 0.8, jitter: 0.03 });
 
-                // Flowers scattered along shore (15% chance)
-                if (Math.random() < 0.15) {
-                    world.add(x, 1, z, pick(flowers), { rough: 0.4, emissive: pick(flowers), emissiveI: 0.15 });
+                // Flowers scattered along shore (6% chance) — small pixels
+                if (Math.random() < 0.06) {
+                    world.add(x, 1, z, pick(flowers), { rough: 0.4, emissive: pick(flowers), emissiveI: 0.15, sx: 0.4, sy: 0.5, sz: 0.4 });
                 }
                 // Tall grass tufts (10% chance)
                 if (Math.random() < 0.1) {
@@ -43,9 +43,9 @@ export function buildTerrain(world) {
             } else {
                 // Outer area — rich grass
                 world.add(x, 0, z, pick(PAL.grass), { rough: 0.85, jitter: 0.03 });
-                // More flowers on outer ring
-                if (Math.random() < 0.08) {
-                    world.add(x, 1, z, pick(flowers), { rough: 0.4, emissive: pick(flowers), emissiveI: 0.1 });
+                // More flowers on outer ring — small pixels
+                if (Math.random() < 0.03) {
+                    world.add(x, 1, z, pick(flowers), { rough: 0.4, emissive: pick(flowers), emissiveI: 0.1, sx: 0.4, sy: 0.5, sz: 0.4 });
                 }
             }
         }
@@ -132,7 +132,7 @@ export function buildDock(world) {
 // ---------------------------------------------------------------------------
 export function buildVegetation(world) {
     const placed = [];
-    const flowers = ['#ff6b8a', '#ff9ecb', '#ffcc44', '#aa66ff', '#66ccff', '#ff8844', '#ffffff', '#ffaacc'];
+    const flowers = ['#e81224', '#cc0000', '#ffcc00', '#ffd700', '#ff1493', '#ff69b4'];
 
     function canPlace(x, z, spacing) {
         const dist = Math.sqrt(x * x + z * z);
@@ -204,16 +204,16 @@ export function buildVegetation(world) {
         }
     }
 
-    // Flower bushes (dense clusters along shore)
-    for (let i = 0; i < 20; i++) {
+    // Flower bushes (sparse clusters along shore) — small delicate flowers
+    for (let i = 0; i < 8; i++) {
         const angle = Math.random() * Math.PI * 2;
         const r = TERRAIN.shoreStart + Math.random() * 6;
         const x = Math.round(Math.cos(angle) * r);
         const z = Math.round(Math.sin(angle) * r);
-        // Low flower bush (2-3 voxels)
+        // Small flower cluster
         for (let dx = 0; dx <= 1; dx++) {
             for (let dz = 0; dz <= 1; dz++) {
-                world.add(x + dx, 1, z + dz, pick(flowers), { rough: 0.4, emissive: pick(flowers), emissiveI: 0.1 });
+                world.add(x + dx, 1, z + dz, pick(flowers), { rough: 0.4, emissive: pick(flowers), emissiveI: 0.1, sx: 0.35, sy: 0.45, sz: 0.35 });
             }
         }
     }
@@ -253,20 +253,49 @@ export function buildVegetation(world) {
 }
 
 // ---------------------------------------------------------------------------
-//  buildHills — distant backdrop silhouette
+//  buildPalmTrees — tropical palm trees around the lake
 // ---------------------------------------------------------------------------
-export function buildHills(world) {
-    const hillRadius = 48;
-    for (let angle = 0; angle < Math.PI * 2; angle += 0.08) {
-        const x = Math.round(Math.cos(angle) * hillRadius);
-        const z = Math.round(Math.sin(angle) * hillRadius);
-        const height = 2 + Math.floor(Math.sin(angle * 3) * 2 + Math.cos(angle * 5) * 1.5 + 3);
-        for (let y = -2; y <= height; y++) {
-            world.add(x, y, z, pick(PAL.hills), { rough: 0.95 });
-            // Thicken
-            world.add(x + 1, y, z, pick(PAL.hills), { rough: 0.95 });
-            world.add(x, y, z + 1, pick(PAL.hills), { rough: 0.95 });
+export function buildPalmTrees(world) {
+    const palmPositions = [];
+
+    for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2 + Math.random() * 0.5;
+        const r = TERRAIN.shoreStart + 3 + Math.random() * 4;
+        const x = Math.round(Math.cos(angle) * r);
+        const z = Math.round(Math.sin(angle) * r);
+
+        // Check spacing
+        let tooClose = false;
+        for (const p of palmPositions) {
+            if (Math.sqrt((x - p.x) ** 2 + (z - p.z) ** 2) < 8) { tooClose = true; break; }
         }
+        if (tooClose) continue;
+        palmPositions.push({ x, z });
+
+        // Slightly curved trunk
+        const height = 7 + Math.floor(Math.random() * 3);
+        const lean = (Math.random() - 0.5) * 0.3;
+        for (let y = 1; y <= height; y++) {
+            const offsetX = Math.round(lean * y);
+            world.add(x + offsetX, y, z, pick(PAL.palmTrunk), { rough: 0.85 });
+        }
+
+        // Fronds — radiating leaf clusters at top
+        const topX = x + Math.round(lean * height);
+        const topY = height + 1;
+        // 6 frond directions
+        for (let f = 0; f < 6; f++) {
+            const fAngle = (f / 6) * Math.PI * 2;
+            for (let seg = 1; seg <= 3; seg++) {
+                const fx = Math.round(Math.cos(fAngle) * seg);
+                const fz = Math.round(Math.sin(fAngle) * seg);
+                const fy = seg === 3 ? -1 : 0; // droop at tips
+                world.add(topX + fx, topY + fy, z + fz, pick(PAL.palmLeaf), { rough: 0.7 });
+            }
+        }
+        // Crown center
+        world.add(topX, topY, z, pick(PAL.palmLeaf), { rough: 0.7 });
+        world.add(topX, topY + 1, z, pick(PAL.palmLeaf), { rough: 0.7 });
     }
 }
 
@@ -278,7 +307,7 @@ export function buildScene({ scene, world, root }) {
     buildBoat(world);
     buildDock(world);
     buildVegetation(world);
-    buildHills(world);
+    buildPalmTrees(world);
 
     world.commit(root);
 

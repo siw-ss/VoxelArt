@@ -35,6 +35,9 @@ export const PAL = {
     firefly: ['#ccff66', '#ffee44', '#aaffaa'],
     // dock planks
     dock: ['#7a5c3a', '#6b4f30', '#8c6840'],
+    // palm tree
+    palmTrunk: ['#8b6914', '#7a5c10', '#9c7a1e'],
+    palmLeaf: ['#2d8c3a', '#3a9c4a', '#4aad5a', '#228b22'],
 };
 
 export function pick(arr) { return arr[(Math.random() * arr.length) | 0]; }

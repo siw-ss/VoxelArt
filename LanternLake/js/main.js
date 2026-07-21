@@ -205,11 +205,8 @@ if (elSun) {
         sunDot.setAttribute('cx', x.toFixed(1));
         sunDot.setAttribute('cy', y.toFixed(1));
     }
-    syncSunDot(0.3); // initial position
-    waterReflection.setTimeOfDay(0.3); // initial water color
 
-    elSun.addEventListener('input', () => {
-        const v = parseInt(elSun.value, 10) / 100;
+    function applyTimeOfDay(v) {
         sunsetValue = v;
         syncSunDot(v);
 
@@ -247,6 +244,14 @@ if (elSun) {
             const label = v < 0.2 ? 'Afternoon' : v < 0.45 ? 'Golden Hour' : v < 0.7 ? 'Twilight' : 'Night';
             elSunVal.textContent = label;
         }
+    }
+
+    // Apply initial time so lighting matches the slider's start position
+    applyTimeOfDay(0.3);
+
+    elSun.addEventListener('input', () => {
+        const v = parseInt(elSun.value, 10) / 100;
+        applyTimeOfDay(v);
     });
 }
 

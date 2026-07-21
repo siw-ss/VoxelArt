@@ -5,7 +5,7 @@ import * as THREE from '../vendor/three.module.js';
 // ---------------------------------------------------------------------------
 
 // --- FIREFLIES ---
-const FIREFLY_CONFIG = { count: 40, radius: 45, innerRadius: 33, yMin: 1, yMax: 8 };
+const FIREFLY_CONFIG = { count: 150, radius: 45, innerRadius: 33, yMin: 1, yMax: 12 };
 
 export function createFireflies({ root }) {
     const geo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
