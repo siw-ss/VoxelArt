@@ -148,6 +148,11 @@ h1 {
   color: #ffb450;
 }
 
+.card-quinary .card-tag {
+  background: rgba(255, 69, 0, 0.25);
+  color: #ff6b35;
+}
+
 .card-placeholder .card-tag {
   background: rgba(246, 201, 69, 0.3);
   color: var(--gold);
