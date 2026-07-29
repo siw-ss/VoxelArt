@@ -153,6 +153,11 @@ h1 {
   color: #ff6b35;
 }
 
+.card-senary .card-tag {
+  background: rgba(0, 180, 216, 0.25);
+  color: #48cae4;
+}
+
 .card-placeholder .card-tag {
   background: rgba(246, 201, 69, 0.3);
   color: var(--gold);
