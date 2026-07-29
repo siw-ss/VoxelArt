@@ -1,27 +1,27 @@
 // Color palette for Underwater Coral Kingdom
 export const PALETTE = {
     // Sand / seabed
-    sand: ['#d4b896', '#c4a878', '#e8d4b0', '#b89a70'],
-    sandDark: ['#8a7050', '#6b5a40'],
+    sand: ['#f2dcae', '#e8cd92', '#fbead0', '#dcbe80'],
+    sandDark: ['#b0905e', '#8f7449'],
 
     // Coral warm
-    coralPink: ['#ff6b8a', '#ff4d6d', '#ff85a1'],
-    coralOrange: ['#ff8c42', '#ff6b35', '#ffaa55'],
-    coralRed: ['#e63946', '#d62839'],
+    coralPink: ['#ff2d78', '#ff0a6c', '#ff5c9e', '#ff1f8f'],
+    coralOrange: ['#ff7b00', '#ff5400', '#ff9e00', '#ff6d00'],
+    coralRed: ['#ff0040', '#e60033'],
 
     // Coral cool
-    coralTeal: ['#00b4d8', '#0096c7', '#48cae4'],
-    coralPurple: ['#7b2d8b', '#9b5de5', '#6a0dad'],
-    coralViolet: ['#4361ee', '#3a0ca3'],
+    coralTeal: ['#00d9ff', '#00b7ff', '#40e0ff', '#00c8f0'],
+    coralPurple: ['#c026ff', '#a600ff', '#d94dff', '#b400f0'],
+    coralViolet: ['#4d3dff', '#6a00ff'],
 
     // Bioluminescent
-    bioGreen: '#00ffcc',
-    bioCyan: '#00e5ff',
-    bioBlue: '#39ff14',
+    bioGreen: '#00ffb3',
+    bioCyan: '#00f0ff',
+    bioBlue: '#4dff00',
 
     // Kelp
-    kelp: ['#2d6b3a', '#4a6b3a', '#3d7a4a', '#6b8c3a'],
-    kelpBladder: '#8b6b20',
+    kelp: ['#2f9e44', '#52b788', '#40916c', '#74c69d'],
+    kelpBladder: '#d4a017',
 
     // Temple stone
     stone: ['#5a6b5a', '#7a8a6a', '#4a5a4a', '#6b7b6b'],
@@ -32,21 +32,21 @@ export const PALETTE = {
     goldDark: '#b8960f',
 
     // Rock
-    rock: ['#3a3a4a', '#4a4a5a', '#2a2a3a', '#5a5a6a'],
+    rock: ['#4a4d66', '#5b5f7a', '#3a3d52', '#6c7090'],
 
     // Sponge
-    spongeYellow: '#ffd166',
-    spongeViolet: '#9b5de5',
-    spongeOrange: '#f77f00',
+    spongeYellow: '#ffd400',
+    spongeViolet: '#b026ff',
+    spongeOrange: '#ff6600',
 
     // Shell / Starfish
-    shell: ['#fff0db', '#ffe4c4', '#ffd4a8'],
-    starfish: '#ff7f50',
+    shell: ['#fff5e6', '#ffe0b3', '#ffcc99'],
+    starfish: '#ff4d1a',
 
     // Fish
-    fishBlue: '#00b4d8',
-    fishYellow: '#ffd166',
-    fishOrange: '#ff6b35',
+    fishBlue: '#00d4ff',
+    fishYellow: '#ffdd00',
+    fishOrange: '#ff5500',
 };
 
 export function pick(arr) {

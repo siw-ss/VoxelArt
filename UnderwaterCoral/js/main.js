@@ -38,8 +38,10 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+// Reinhard keeps more saturation than ACES, which visibly greys out the
+// strong reef hues. Slight exposure lift compensates for its softer highlights.
+renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.toneMappingExposure = 1.5;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.getElementById('app').appendChild(renderer.domElement);
 
@@ -49,10 +51,10 @@ const scene = new THREE.Scene();
 //  DEPTH PROFILE — drives sky, fog and light as you descend
 // ---------------------------------------------------------------------------
 const DEPTH_STOPS = [
-    { t: 0.0, name: 'Surface', top: '#8fe3f2', bottom: '#2596be', fog: '#7fd4ea', fogNear: 55, fogFar: 190, sun: 2.2, amb: 0.55 },
-    { t: 0.35, name: 'Shallow', top: '#3fa9cf', bottom: '#12617f', fog: '#2f8fb0', fogNear: 45, fogFar: 165, sun: 1.5, amb: 0.42 },
-    { t: 0.7, name: 'Deep', top: '#0d4c6b', bottom: '#05263a', fog: '#0b425c', fogNear: 32, fogFar: 130, sun: 0.75, amb: 0.28 },
-    { t: 1.0, name: 'Abyss', top: '#04202f', bottom: '#010a14', fog: '#03161f', fogNear: 22, fogFar: 95, sun: 0.25, amb: 0.16 },
+    { t: 0.0, name: 'Surface', top: '#5ff0ff', bottom: '#00a8e8', fog: '#4de0ff', fogNear: 80, fogFar: 260, sun: 2.6, amb: 0.7 },
+    { t: 0.35, name: 'Shallow', top: '#00c8f0', bottom: '#0077b6', fog: '#00a0d0', fogNear: 65, fogFar: 220, sun: 1.9, amb: 0.55 },
+    { t: 0.7, name: 'Deep', top: '#0a5f8a', bottom: '#023047', fog: '#065a7d', fogNear: 42, fogFar: 155, sun: 0.9, amb: 0.34 },
+    { t: 1.0, name: 'Abyss', top: '#04202f', bottom: '#010a14', fog: '#03161f', fogNear: 24, fogFar: 100, sun: 0.28, amb: 0.18 },
 ];
 
 const _cA = new THREE.Color(), _cB = new THREE.Color();
@@ -117,14 +119,16 @@ controls.autoRotateSpeed = 0.35;
 // ---------------------------------------------------------------------------
 //  LIGHTING
 // ---------------------------------------------------------------------------
-const hemi = new THREE.HemisphereLight(0x9fe4ff, 0x1d4a52, 0.7);
+const hemi = new THREE.HemisphereLight(0xbdf0ff, 0x2a7f6a, 0.85);
 scene.add(hemi);
 
-const ambient = new THREE.AmbientLight(0x8fd8ea, 0.42);
+// Near-white ambient so coral pigments read as their own colour rather
+// than being tinted uniformly blue.
+const ambient = new THREE.AmbientLight(0xf0fbff, 0.55);
 scene.add(ambient);
 
 // Sun shafts filtering down from the surface
-const sun = new THREE.DirectionalLight(0xdff6ff, 1.5);
+const sun = new THREE.DirectionalLight(0xffffff, 1.9);
 sun.position.set(30, 90, 20);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);

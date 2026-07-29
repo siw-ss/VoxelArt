@@ -143,7 +143,7 @@ export function buildScene({ world, root }) {
             }
             // Bright rim at the mouth
             world.add(ox, base + 1 + h, oz, PALETTE.bioCyan, {
-                emissive: PALETTE.bioCyan, emissiveI: 0.7, rough: 0.4, sx: 0.8, sy: 0.4, sz: 0.8
+                emissive: PALETTE.bioCyan, emissiveI: 1.4, rough: 0.3, sx: 0.8, sy: 0.4, sz: 0.8
             });
         }
     }
@@ -194,14 +194,14 @@ export function buildScene({ world, root }) {
             const oy = base + 1 + Math.floor(Math.random() * 4);
             const sc = 0.5 + Math.random() * 0.5;
             world.add(ox, oy, oz, s.color, {
-                emissive: s.color, emissiveI: 1.6, rough: 0.25,
+                emissive: s.color, emissiveI: 2.6, rough: 0.2,
                 sx: sc, sy: sc, sz: sc, jitter: 0.2
             });
         }
-        const light = new THREE.PointLight(new THREE.Color(s.color), 6, 26, 2);
+        const light = new THREE.PointLight(new THREE.Color(s.color), 9, 30, 2);
         light.position.set(s.x, base + 4, s.z);
         root.add(light);
-        bioLights.push({ light, baseIntensity: 6, phase: Math.random() * Math.PI * 2 });
+        bioLights.push({ light, baseIntensity: 9, phase: Math.random() * Math.PI * 2 });
     }
 
     // ========================================================================
@@ -349,6 +349,132 @@ export function buildScene({ world, root }) {
                 rough: 0.95, sx: 0.28, sz: 0.28, jitter: 0.12
             });
         }
+    }
+
+    // ========================================================================
+    //  OCTOPUSES — bulbous head + 8 curling tentacles
+    // ========================================================================
+    const octopusSpots = [
+        { x: -20, z: -26, color: '#c026ff' },
+        { x: 26, z: 22, color: '#ff2d78' },
+        { x: -30, z: 16, color: '#ff7b00' },
+    ];
+
+    for (const oc of octopusSpots) {
+        const base = groundY(oc.x, oc.z) + 1;
+
+        // Head (small dome)
+        for (let dy = 0; dy < 3; dy++) {
+            const r = dy < 2 ? 1 : 0;
+            for (let dx = -r; dx <= r; dx++) {
+                for (let dz = -r; dz <= r; dz++) {
+                    if (dx * dx + dz * dz > r * r) continue;
+                    world.add(oc.x + dx, base + 2 + dy, oc.z + dz, oc.color, {
+                        rough: 0.7, jitter: 0.08, sx: 0.8, sy: 0.8, sz: 0.8
+                    });
+                }
+            }
+        }
+
+        // Eyes
+        world.add(oc.x, base + 3, oc.z + 1, '#ffffff', { rough: 0.3, sx: 0.3, sy: 0.3, sz: 0.3 });
+        world.add(oc.x, base + 3, oc.z + 1, '#111111', { rough: 0.2, sx: 0.15, sy: 0.15, sz: 0.2 });
+
+        // Tentacles — 8 short arms
+        for (let t = 0; t < 8; t++) {
+            const ang = (t / 8) * Math.PI * 2;
+            let tx = oc.x, tz = oc.z, ty = base + 1;
+            const dirX = Math.cos(ang), dirZ = Math.sin(ang);
+            const len = 3 + Math.floor(Math.random() * 2);
+            for (let seg = 0; seg < len; seg++) {
+                tx += dirX * 0.7;
+                tz += dirZ * 0.7;
+                ty -= 0.25;
+                const curl = seg > len - 2 ? 0.2 : 0;
+                world.add(
+                    Math.round(tx - curl * dirX),
+                    Math.round(ty),
+                    Math.round(tz - curl * dirZ),
+                    oc.color,
+                    { rough: 0.75, sx: 0.4 - seg * 0.04, sy: 0.35, sz: 0.4 - seg * 0.04, jitter: 0.08 }
+                );
+            }
+        }
+    }
+
+    // ========================================================================
+    //  SHIPWRECK — half a hull tilted into the sand
+    // ========================================================================
+    const shipX = -14, shipZ = -30;
+    const shipBase = groundY(shipX, shipZ);
+    const hullColor = '#5c3a1e';
+    const hullDark = '#3e2410';
+    const hullLength = 18;
+    const hullHeight = 10;
+    const hullWidth = 6;
+
+    // The hull is a tapered box tilted ~15° (we fake the tilt by shifting rows)
+    for (let seg = 0; seg < hullLength; seg++) {
+        const t01 = seg / (hullLength - 1);
+        // Taper: narrow at the bow (seg=0), full width amidships, broken at stern
+        const halfW = Math.round(hullWidth * 0.5 * Math.sin(t01 * Math.PI * 0.75));
+        // Tilt: stern buried deeper, bow higher
+        const tiltY = Math.round(seg * 0.45);
+
+        for (let y = 0; y < hullHeight; y++) {
+            // Only build the outer shell (walls of the hull)
+            for (let w = -halfW; w <= halfW; w++) {
+                const isWall = Math.abs(w) === halfW || y === 0;
+                // Broken stern: top rows missing past 75% of length
+                if (seg > hullLength * 0.75 && y > hullHeight * 0.5) continue;
+                // Random holes for a wreck look
+                if (y > 2 && Math.random() < 0.08) continue;
+                if (!isWall && y !== 0) continue;
+
+                const col = (y === 0 || Math.random() < 0.3) ? hullDark : hullColor;
+                world.add(
+                    shipX + seg,
+                    shipBase + y + tiltY,
+                    shipZ + w,
+                    col,
+                    { rough: 0.95, jitter: 0.06 }
+                );
+            }
+        }
+
+        // Deck planks (flat top every few segments)
+        if (seg % 2 === 0 && seg < hullLength * 0.75) {
+            for (let w = -halfW + 1; w < halfW; w++) {
+                world.add(shipX + seg, shipBase + hullHeight + tiltY, shipZ + w, hullColor, {
+                    rough: 0.95, sy: 0.35, jitter: 0.04
+                });
+            }
+        }
+    }
+
+    // Mast stump — broken halfway
+    const mastSeg = Math.round(hullLength * 0.4);
+    const mastBase = shipBase + hullHeight + Math.round(mastSeg * 0.45);
+    for (let y = 0; y < 8; y++) {
+        world.add(shipX + mastSeg, mastBase + y, shipZ, '#4a3520', {
+            rough: 0.9, sx: 0.7, sz: 0.7
+        });
+    }
+
+    // Barnacles / coral colonisation on the hull
+    for (let i = 0; i < 20; i++) {
+        const seg = Math.floor(Math.random() * hullLength);
+        const t01 = seg / (hullLength - 1);
+        const halfW = Math.round(hullWidth * 0.5 * Math.sin(t01 * Math.PI * 0.75));
+        const side = Math.random() < 0.5 ? -halfW : halfW;
+        const y = Math.floor(Math.random() * 5);
+        const tiltY = Math.round(seg * 0.45);
+        const col = Math.random() < 0.5
+            ? pick(coralPalettes[Math.floor(Math.random() * coralPalettes.length)])
+            : pick(PALETTE.kelp);
+        world.add(shipX + seg, shipBase + y + tiltY, shipZ + side, col, {
+            rough: 0.8, jitter: 0.15, sx: 0.7, sy: 0.7, sz: 0.7
+        });
     }
 
     world.commit(root);
