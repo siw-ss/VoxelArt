@@ -14,7 +14,7 @@ import {
 initDiagnostics();
 initDock();
 initTypewriter();
-initFlyout("bubbles-btn", "bubbles-panel");
+initFlyout("bubble-btn", "bubble-panel");
 initFlyout("depth-btn", "depth-panel");
 
 // ---------------------------------------------------------------------------

@@ -146,11 +146,6 @@ const fireflies = createFireflies({ root });
 const waterReflection = createWaterReflection({ root });
 const clouds = createClouds({ root });
 
-// --- UI ---
-initDock();
-initPanels();
-initTypewriter();
-
 // --- Wire controls ---
 const elRotate = document.getElementById('rotate');
 const elFireflies = document.getElementById('fireflies-toggle');

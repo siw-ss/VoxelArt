@@ -522,14 +522,18 @@ canvas {
 
 /* ===== Home Button ===== */
 .home-btn {
-    background: linear-gradient(160deg, var(--home-btn-primary), var(--home-btn-secondary)) !important;
-    border-color: rgba(255, 255, 255, 0.6) !important;
-    box-shadow: 0 8px 24px var(--home-btn-glow), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+    background: linear-gradient(160deg, rgba(255, 180, 100, 0.9), rgba(255, 140, 60, 0.75)) !important;
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 0 16px rgba(255, 160, 80, 0.6), 
+                0 8px 24px rgba(255, 160, 80, 0.4), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
 }
 
 .home-btn:hover {
-    background: linear-gradient(160deg, var(--home-btn-primary-hover), var(--home-btn-secondary-hover)) !important;
-    box-shadow: 0 10px 32px var(--home-btn-glow), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    background: linear-gradient(160deg, rgba(255, 200, 120, 1), rgba(255, 160, 80, 0.9)) !important;
+    box-shadow: 0 0 24px rgba(255, 160, 80, 0.8), 
+                0 12px 32px rgba(255, 160, 80, 0.5), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
 }
 
 .home-btn .ico {

@@ -18,11 +18,6 @@ initDock();
 initSunPanel();
 initLavaPanel();
 initTypewriter();
-initDiagnostics();
-initDock();
-initSunPanel();
-initLavaPanel();
-initTypewriter();
 
 // ---------------------------------------------------------------------------
 //  RENDERER / SCENE / CAMERA

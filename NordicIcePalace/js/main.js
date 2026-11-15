@@ -153,13 +153,6 @@ const todSystem = createTODSystem({ auroraAPI });
 const dragonSystem = createDragons({ root });
 
 // ---------------------------------------------------------------------------
-//  UI INITIALIZATION
-// ---------------------------------------------------------------------------
-initDock();
-initPanels();
-initTypewriter();
-
-// ---------------------------------------------------------------------------
 //  WIRE DOCK TOGGLES
 // ---------------------------------------------------------------------------
 const elRotate = document.getElementById('rotate');
