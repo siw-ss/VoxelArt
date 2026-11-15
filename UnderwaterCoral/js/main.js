@@ -11,16 +11,11 @@ import {
     initTypewriter,
 } from './ui.js';
 
-function goToHome() {
-    window.location.href = '../index.html';
-}
-
-// Init UI
 initDiagnostics();
 initDock();
-initFlyout('bubble-btn', 'bubble-panel');
-initFlyout('depth-btn', 'depth-panel');
 initTypewriter();
+initFlyout("bubbles-btn", "bubbles-panel");
+initFlyout("depth-btn", "depth-panel");
 
 // ---------------------------------------------------------------------------
 //  RENDERER / SCENE / CAMERA
@@ -215,6 +210,10 @@ let depthGlowBoost = 1;
 elDepth.addEventListener('input', e => applyDepth(parseInt(e.target.value, 10) / 100));
 
 // Home button navigates back to the portfolio index
+function goToHome() {
+    window.location.href = '../index.html';
+}
+
 const elHomeLabel = document.querySelector('label[title="Home"]');
 if (elHomeLabel) elHomeLabel.addEventListener('click', () => goToHome());
 

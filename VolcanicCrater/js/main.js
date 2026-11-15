@@ -12,12 +12,12 @@ import {
     initTypewriter,
 } from './ui.js';
 
-// Navigation helper
-function goToHome() {
-    window.location.href = '../index.html';
-}
-
 // Init UI
+initDiagnostics();
+initDock();
+initSunPanel();
+initLavaPanel();
+initTypewriter();
 initDiagnostics();
 initDock();
 initSunPanel();
@@ -173,6 +173,10 @@ elSun.addEventListener('input', e => {
 });
 
 // Home view
+function goToHome() {
+    window.location.href = '../index.html';
+}
+
 const elHomeLabel = document.querySelector('label[title="Home view"]');
 if (elHomeLabel) {
     elHomeLabel.addEventListener('click', () => goToHome());

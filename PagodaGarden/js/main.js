@@ -11,12 +11,6 @@ import {
     initTypewriter,
 } from './ui.js';
 
-// Navigation helper
-function goToHome() {
-    // Navigate to the parent directory's index.html (main portfolio page)
-    window.location.href = '../index.html';
-}
-
 // On-screen diagnostics + DOM UI behaviors (independent of the 3D scene).
 initDiagnostics();
 initDock();
@@ -165,6 +159,10 @@ elSun.addEventListener('input', e => {
 });
 
 // Home view button - use label click for better browser compatibility
+function goToHome() {
+    window.location.href = '../index.html';
+}
+
 const elHomeLabel = document.querySelector('label[title="Home view"]');
 if (elHomeLabel) {
     console.log('Home view label found');

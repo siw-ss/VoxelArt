@@ -18,6 +18,11 @@ import {
     initTypewriter,
 } from './ui.js';
 
+initDiagnostics();
+initDock();
+initPanels();
+initTypewriter();
+
 // ---------------------------------------------------------------------------
 //  Init UI (early — catches load errors)
 // ---------------------------------------------------------------------------

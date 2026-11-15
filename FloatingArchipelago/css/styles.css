@@ -1,5 +1,10 @@
 :root {
     color-scheme: dark;
+    --home-btn-primary: rgba(0, 229, 255, 0.65);
+    --home-btn-secondary: rgba(255, 215, 0, 0.5);
+    --home-btn-primary-hover: rgba(0, 229, 255, 0.85);
+    --home-btn-secondary-hover: rgba(255, 215, 0, 0.7);
+    --home-btn-glow: rgba(0, 229, 255, 0.5);
 }
 
 * {
@@ -487,4 +492,20 @@ canvas {
 #loader.hidden {
     opacity: 0;
     pointer-events: none;
+}
+/* ===== Home Button ===== */
+.home-btn {
+    background: linear-gradient(160deg, var(--home-btn-primary), var(--home-btn-secondary)) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 8px 24px var(--home-btn-glow), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+.home-btn:hover {
+    background: linear-gradient(160deg, var(--home-btn-primary-hover), var(--home-btn-secondary-hover)) !important;
+    box-shadow: 0 10px 32px var(--home-btn-glow), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+.home-btn .ico {
+    opacity: 1 !important;
+    transform: scale(1) !important;
 }

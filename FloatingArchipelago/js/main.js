@@ -12,11 +12,6 @@ import {
 } from './ui.js';
 import { createAnimals } from './animals.js';
 
-// Navigation helper
-function goToHome() {
-    window.location.href = '../index.html';
-}
-
 // Init UI
 initDiagnostics();
 initDock();
@@ -209,6 +204,10 @@ elSun.addEventListener('input', e => {
 });
 
 // Home view
+function goToHome() {
+    window.location.href = '../index.html';
+}
+
 const elHomeLabel = document.querySelector('label[title="Home view"]');
 if (elHomeLabel) {
     elHomeLabel.addEventListener('click', () => goToHome());

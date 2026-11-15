@@ -10,6 +10,9 @@ import {
 } from './ui.js';
 
 initDiagnostics();
+initDock();
+initPanels();
+initTypewriter();
 
 // --- Renderer ---
 let renderer;
